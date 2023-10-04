@@ -152,15 +152,15 @@ spark database, and each file will be loaded as table, using the filename to nam
 
 
 &gt;&gt;&gt; spark.table(&quot;school.students&quot;).show()
-+---+----------+---------+--------------------+------+
-| id|first_name|last_name|               email|gender|
-+---+----------+---------+--------------------+------+
-|  1|  Shirleen|  Dunford|sdunford0@amazona...|Female|
-|  2|      Niko|  Puckrin|npuckrin1@shinyst...|  Male|
-|  3|    Sergei|   Barukh|sbarukh2@bizjourn...|  Male|
-|  4|       Sal|  Maidens|smaidens3@senate.gov|  Male|
-|  5|    Cooper|MacGuffie| cmacguffie4@ibm.com|  Male|
-+---+----------+---------+--------------------+------+
++---+----------+---------+--------------------+------+----------+
+| id|first_name|last_name|               email|gender|birth_date|
++---+----------+---------+--------------------+------+----------+
+|  1|  Shirleen|  Dunford|sdunford0@amazona...|Female|1978-08-01|
+|  2|      Niko|  Puckrin|npuckrin1@shinyst...|  Male|2000-11-28|
+|  3|    Sergei|   Barukh|sbarukh2@bizjourn...|  Male|1992-01-20|
+|  4|       Sal|  Maidens|smaidens3@senate.gov|  Male|2003-12-14|
+|  5|    Cooper|MacGuffie| cmacguffie4@ibm.com|  Male|2000-03-07|
++---+----------+---------+--------------------+------+----------+
 
 </code></pre>
 <p>Note how it is already filled with the data each CSV file has! The tool supports all kind of files: <code>csv</code>, <code>parquet</code>,
@@ -253,5 +253,5 @@ $ mv tests/data/basic_datalake/grades tests/data/basic_datalake/foo
 
 <!--
 MkDocs version : 1.5.2
-Build Date UTC : 2023-10-04 00:59:06.780386+00:00
+Build Date UTC : 2023-10-04 05:35:06.661540+00:00
 -->

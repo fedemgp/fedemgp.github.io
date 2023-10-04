@@ -55,6 +55,14 @@
     <li class="toctree-l2"><a class="reference internal" href="#custom-configuration">Custom configuration</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#configuration-file-explanation">Configuration file explanation</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#app-configuration">App configuration</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#schema-configuration">Schema configuration</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#delta-configuration">Delta configuration</a>
+    </li>
+        </ul>
     </li>
     </ul>
                   </li>
@@ -174,50 +182,106 @@ configuration.</p>
 <p>Note that now the spark session now use 4 CPU cores, the delta framework is enabled, and it uses the <code>hive</code> catalog
 implementation.</p>
 <h2 id="configuration-file-explanation">Configuration file explanation</h2>
+<!--
+# Validate that the dataclass didn't change, and alert me if it did to update this part of the documentation
+$ cat ./pyspark_data_mocker/config/app_config.py  # byexample: +rm=~
+<...>
+@dataclasses.dataclass
+class AppConfig:
+    app_name: str
+    number_of_cores: int
+    enable_hive: bool
+    warehouse_dir: Dir
+    schema: "SchemaConfig"
+    delta_configuration: Optional["DeltaConfig"] = None
+<...>
+@dataclasses.dataclass
+class DeltaConfig:
+    scala_version: str
+    delta_version: str
+    snapshot_partitions: int
+    log_cache_size: int
+<...>
+@dataclasses.dataclass
+class SchemaConfig:
+    infer: bool
+    config_file: str
+<...>
+-->
 <p>¿But, what do those values represent? Let's take a closer look on the levers that we can control in this configuration
 file </p>
+<h3 id="app-configuration">App configuration</h3>
 <table>
 <thead>
 <tr>
 <th>config name</th>
 <th>type</th>
-<th>description</th>
 <th>default value</th>
+<th>description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>number_of_cores</code></td>
 <td>INTEGER</td>
-<td>change the amount of CPU cores  The spark session will use</td>
 <td>1</td>
+<td>change the amount of CPU cores  The spark session will use</td>
 </tr>
 <tr>
 <td><code>enable_hive</code></td>
 <td>BOOL</td>
-<td>Enables the usage of <a href="https://spark.apache.org/docs/3.1.1/api/python/reference/api/pyspark.sql.SparkSession.builder.enableHiveSupport.html">Apache Hive's catalog</a></td>
 <td>false</td>
+<td>Enables the usage of <a href="https://spark.apache.org/docs/3.1.1/api/python/reference/api/pyspark.sql.SparkSession.builder.enableHiveSupport.html">Apache Hive's catalog</a></td>
 </tr>
 <tr>
 <td><code>warehouse_dir</code></td>
 <td>STRING</td>
-<td>If set, it will create a persistent directory where the wharehouse will live. By default <code>pyspark_data_mocker</code> uses a <a href="https://docs.python.org/3/library/tempfile.html#tempfile.TemporaryDirectory">TemporaryDirectory</a> that will exists as long the builder instance exists</td>
 <td>tempfile.TemporaryDirectory()</td>
+<td>If set, it will create a persistent directory where the wharehouse will live. By default <code>pyspark_data_mocker</code> uses a <a href="https://docs.python.org/3/library/tempfile.html#tempfile.TemporaryDirectory">TemporaryDirectory</a> that will exists as long the builder instance exists</td>
 </tr>
 <tr>
-<td><code>schema_config_file_name</code></td>
-<td>STRING</td>
-<td>Yaml file to Configure the schema of each table the datalake will have. By default <code>pyspark_data_mocker</code> will search for a <code>schema_config.yaml</code> file. See <a href="https://fedemgp.github.io/Documentation/schema_infering/">Schema infering section for further details</a></td>
-<td>schema_config.yaml</td>
+<td><code>schema</code></td>
+<td>SCHEMA_CONFIG</td>
+<td>DEFAULT_CONFIG</td>
+<td>Schema configuration</td>
 </tr>
 <tr>
 <td><code>delta_configuration</code></td>
 <td>DELTA_CONFIG</td>
-<td>If set, it will enable <a href="https://delta.io/">Delta Lake framework</a></td>
 <td>None</td>
+<td>If set, it will enable <a href="https://delta.io/">Delta Lake framework</a></td>
 </tr>
 </tbody>
 </table>
+<h3 id="schema-configuration">Schema configuration</h3>
+<p>Inside the app configuration, there is a special configuration for the schema. There you can set these options as you
+please</p>
+<table>
+<thead>
+<tr>
+<th>config name</th>
+<th>type</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>infer</code></td>
+<td>BOOL</td>
+<td>false</td>
+<td>Enable automatic column type infering</td>
+</tr>
+<tr>
+<td><code>config_file</code></td>
+<td>STRING</td>
+<td>schema_config.yaml</td>
+<td>Config file name to read for manual schema definition</td>
+</tr>
+</tbody>
+</table>
+<p>More about schema inferring can be seen <a href="https://fedemgp.github.io/Documentation/schema_infering/">here</a></p>
+<h3 id="delta-configuration">Delta configuration</h3>
 <p>Among the things you can change when enabling Delta capabilities are:</p>
 <table>
 <thead>
