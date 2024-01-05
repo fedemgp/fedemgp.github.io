@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Configuration - PySpark data mocker</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../css/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Configuration";
+        var mkdocs_page_input_path = "documentation/configuration.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/bash.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> PySpark data mocker
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Documentation</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Configuration</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#default-configuration">Default configuration</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#custom-configuration">Custom configuration</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#configuration-file-explanation">Configuration file explanation</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#app-configuration">App configuration</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#schema-configuration">Schema configuration</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#spark-configuration">Spark configuration</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#delta-configuration">Delta configuration</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../schema_infering/">Schema infering</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">PySpark data mocker</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Documentation</li>
+      <li class="breadcrumb-item active">Configuration</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="configuration">Configuration</h1>
+<h2 id="default-configuration">Default configuration</h2>
+<p><code>pyspark-data-mocker</code> configures spark in a way that optimize tests executions.</p>
+<pre><code class="language-python">&gt;&gt;&gt; from pyspark_data_mocker import DataLakeBuilder
+&gt;&gt;&gt; builder = DataLakeBuilder.load_from_dir(&quot;./tests/data/basic_datalake&quot;)  # byexample: +timeout=20 +pass
+&gt;&gt;&gt; spark = builder.spark
+&gt;&gt;&gt; spark_conf = spark.conf
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; spark_conf.get(&quot;spark.app.name&quot;)
+'test'
+&gt;&gt;&gt; spark_conf.get(&quot;spark.master&quot;)  # 1 thread for the execution
+'local[1]'
+&gt;&gt;&gt; spark_conf.get(&quot;spark.sql.warehouse.dir&quot;)  # Temporal directory to store the data warehouse
+'/tmp/tmp&lt;...&gt;/spark_warehouse'
+&gt;&gt;&gt; spark_conf.get(&quot;spark.sql.shuffle.partitions&quot;)
+'1'
+
+&gt;&gt;&gt; spark_conf.get(&quot;spark.ui.showConsoleProgress&quot;)
+'false'
+
+&gt;&gt;&gt; spark_conf.get(&quot;spark.ui.enabled&quot;)
+'false'
+&gt;&gt;&gt; spark_conf.get(&quot;spark.ui.dagGraph.retainedRootRDDs&quot;)
+'1'
+&gt;&gt;&gt; spark_conf.get(&quot;spark.ui.retainedJobs&quot;)
+'1'
+&gt;&gt;&gt; spark_conf.get(&quot;spark.ui.retainedStages&quot;)
+'1'
+&gt;&gt;&gt; spark_conf.get(&quot;spark.ui.retainedTasks&quot;)
+'1'
+&gt;&gt;&gt; spark_conf.get(&quot;spark.sql.ui.retainedExecutions&quot;)
+'1'
+&gt;&gt;&gt; spark_conf.get(&quot;spark.worker.ui.retainedExecutors&quot;)
+'1'
+&gt;&gt;&gt; spark_conf.get(&quot;spark.worker.ui.retainedDrivers&quot;)
+'1'
+
+&gt;&gt;&gt; spark_conf.get(&quot;spark.sql.catalogImplementation&quot;)
+'in-memory'
+</code></pre>
+<p>To better understand what these configuration means and why it is configured like this, you can take a look
+on Sergey Ivanychev's excellent research on <a href="https://medium.com/constructor-engineering/faster-pyspark-unit-tests-1cb7dfa6bdf6">"Faster PySpark Unit Test"</a></p>
+<h2 id="custom-configuration">Custom configuration</h2>
+<p>Some of these configurations can be overridden by providing a config yaml file. For example lets build a custom
+configuration.</p>
+<pre><code class="language-bash">$ echo &quot;
+&gt; spark_configuration:
+&gt;    app_name: test_complete
+&gt;    number_of_cores: 4
+&gt;    enable_hive: True
+&gt;    warehouse_dir: &quot;/tmp/full_delta_lake&quot;
+&gt;    delta_configuration:
+&gt;        scala_version: '2.12'
+&gt;        delta_version: '2.0.2'
+&gt;        snapshot_partitions: 2
+&gt;        log_cache_size: 3
+&gt; &quot; &gt; /tmp/custom_config.yaml
+</code></pre>
+<!--
+# clean previous spark configuration
+>>> from pyspark.sql import SparkSession
+>>> spark.stop()
+>>> SparkSession.builder._options = {}
+-->
+
+<p>To use a custom configuration, you can pass a <code>string</code> or <code>pathlib.Path</code> optional argument to <code>load_from_dir</code>.</p>
+<pre><code class="language-python">&gt;&gt;&gt; builder = DataLakeBuilder.load_from_dir(&quot;./tests/data/basic_datalake&quot;, &quot;/tmp/custom_config.yaml&quot;)  # byexample: +timeout=20
+&lt;...&gt;
+&gt;&gt;&gt; spark_conf = SparkSession.builder.getOrCreate().conf
+&gt;&gt;&gt; spark_conf.get(&quot;spark.app.name&quot;)
+'test_complete'
+&gt;&gt;&gt; spark_conf.get(&quot;spark.master&quot;)
+'local[4]'
+&gt;&gt;&gt; spark_conf.get(&quot;spark.sql.warehouse.dir&quot;)
+'/tmp/full_delta_lake/spark_warehouse'
+
+&gt;&gt;&gt; spark_conf.get(&quot;spark.jars.packages&quot;)
+'io.delta:delta-core_2.12:2.0.2'
+&gt;&gt;&gt; spark_conf.get(&quot;spark.sql.extensions&quot;)
+'io.delta.sql.DeltaSparkSessionExtension'
+&gt;&gt;&gt; spark_conf.get(&quot;spark.databricks.delta.snapshotPartitions&quot;)
+'2'
+&gt;&gt;&gt; spark_conf.get(&quot;spark.sql.catalog.spark_catalog&quot;)
+'org.apache.spark.sql.delta.catalog.DeltaCatalog'
+
+&gt;&gt;&gt; spark_conf.get(&quot;spark.sql.catalogImplementation&quot;)
+'hive'
+</code></pre>
+<p>Note that now the spark session now use 4 CPU cores, the delta framework is enabled, and it uses the <code>hive</code> catalog
+implementation.</p>
+<h2 id="configuration-file-explanation">Configuration file explanation</h2>
+<!--
+# Validate that the dataclass didn't change, and alert me if it did to update this part of the documentation
+$ cat ./pyspark_data_mocker/config/app_config.py  # byexample: +rm=~
+<...>
+@dataclasses.dataclass
+class AppConfig:
+    disable_spark_configuration: bool
+    schema: "SchemaConfig"
+    spark_configuration: Optional["SparkConfig"] = None
+<...>
+@dataclasses.dataclass
+class SparkConfig:
+    app_name: str
+    number_of_cores: int
+    enable_hive: bool
+    warehouse_dir: Dir
+    delta_configuration: Optional["DeltaConfig"] = None
+<...>
+@dataclasses.dataclass
+class DeltaConfig:
+    scala_version: str
+    delta_version: str
+    snapshot_partitions: int
+    log_cache_size: int
+<...>
+@dataclasses.dataclass
+class SchemaConfig:
+    infer: bool
+    config_file: str
+<...>
+-->
+<p>¿But, what do those values represent? Let's take a closer look on the levers that we can control in this configuration
+file </p>
+<h3 id="app-configuration">App configuration</h3>
+<table>
+<thead>
+<tr>
+<th>config name</th>
+<th>type</th>
+<th>default value</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>schema</code></td>
+<td>SCHEMA_CONFIG</td>
+<td>DEFAULT_CONFIG</td>
+<td>Schema configuration</td>
+</tr>
+<tr>
+<td><code>disable_spark_configuration</code></td>
+<td>BOOL</td>
+<td>False</td>
+<td>If set to true, then all spark optimization mentioned before will be disabled. It is responsability of the developer to configure spark as he wish</td>
+</tr>
+<tr>
+<td><code>spark_configuration</code></td>
+<td>SPARK_CONFIG</td>
+<td></td>
+<td>A reduced a mount of levers to modify the spark configuration recommended for tests.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="schema-configuration">Schema configuration</h3>
+<p>Inside the app configuration, there is a special configuration for the schema. There you can set these options as you
+please</p>
+<table>
+<thead>
+<tr>
+<th>config name</th>
+<th>type</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>infer</code></td>
+<td>BOOL</td>
+<td>false</td>
+<td>Enable automatic column type infering</td>
+</tr>
+<tr>
+<td><code>config_file</code></td>
+<td>STRING</td>
+<td>schema_config.yaml</td>
+<td>Config file name to read for manual schema definition</td>
+</tr>
+</tbody>
+</table>
+<p>More about schema inferring can be seen <a href="https://fedemgp.github.io/Documentation/schema_infering/">here</a></p>
+<h3 id="spark-configuration">Spark configuration</h3>
+<p>This is mandatory if you want to let <code>pyspark-data-mocker</code> to handle the spark configuration for you.
+It tries to abstract the user how the session should be and let him concentrate on define good test.
+One advance developer may ask by himself: "why are you obfuscating me how the spark session is configured? I demand to
+be free to configure Spark as I desire". To that advance user , <strong>you can disable the automatic spark configuration</strong> by setting as <code>True</code> the value <code>disable_spark_configuration</code>.</p>
+<p>That Engineer is responsible to configure spark before using this package, using the jars he wants. Here we
+recommend to still stick to the recommendations commented <a href="https://medium.com/constructor-engineering/faster-pyspark-unit-tests-1cb7dfa6bdf6">here</a> in order to make the tests as fast as possible. Take in mind that the default spark configuration behaves poorly when
+handling a low amount of data, and if you write a considerable amount of test, the pipeline
+that run all the unit test may take forever!.</p>
+<p>Among the things you can modify in the Spark session if you let this package control it are:</p>
+<table>
+<thead>
+<tr>
+<th>config name</th>
+<th>type</th>
+<th>default value</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>number_of_cores</code></td>
+<td>INTEGER</td>
+<td>1</td>
+<td>change the amount of CPU cores  The spark session will use</td>
+</tr>
+<tr>
+<td><code>enable_hive</code></td>
+<td>BOOL</td>
+<td>false</td>
+<td>Enables the usage of <a href="https://spark.apache.org/docs/3.1.1/api/python/reference/api/pyspark.sql.SparkSession.builder.enableHiveSupport.html">Apache Hive's catalog</a></td>
+</tr>
+<tr>
+<td><code>warehouse_dir</code></td>
+<td>STRING</td>
+<td>tempfile.TemporaryDirectory()</td>
+<td>If set, it will create a persistent directory where the wharehouse will live. By default <code>pyspark_data_mocker</code> uses a <a href="https://docs.python.org/3/library/tempfile.html#tempfile.TemporaryDirectory">TemporaryDirectory</a> that will exists as long the builder instance exists</td>
+</tr>
+<tr>
+<td><code>delta_configuration</code></td>
+<td>DELTA_CONFIG</td>
+<td>None</td>
+<td>If set, it will enable <a href="https://delta.io/">Delta Lake framework</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="delta-configuration">Delta configuration</h3>
+<p>Among the things you can change when enabling Delta capabilities are:</p>
+<table>
+<thead>
+<tr>
+<th>config name</th>
+<th>type</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scala_version</code></td>
+<td>STRING</td>
+<td>Version of Scala that the spark session will use. Take into consideration that the scala version <a href="https://mvnrepository.com/artifact/io.delta/delta-core">MUST be compatible</a> with the Delta-core version used</td>
+</tr>
+<tr>
+<td><code>delta_version</code></td>
+<td>STRING</td>
+<td>Version of delta core used. The version used highly depends <a href="https://docs.delta.io/latest/releases.html">on the pyspark version</a></td>
+</tr>
+<tr>
+<td><code>snapshot_partitions</code></td>
+<td>INTEGER</td>
+<td>Tells delta how should the partitions be done</td>
+</tr>
+<tr>
+<td><code>log_cache_size</code></td>
+<td>INTEGER</td>
+<td>Limits the Delta log cache</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Important note:</strong> If you enable Delta capabilities, check your pyspark version, and configure the right value of
+scala and delta version.</p>
+<p><strong>Important note 2:</strong> For the delta configuration, take into consideration that ALL VALUES should be explicitly set-up, there is no default
+value for each one of them.</p>
+</blockquote>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../.." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../schema_infering/" class="btn btn-neutral float-right" title="Schema infering">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../.." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../schema_infering/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
