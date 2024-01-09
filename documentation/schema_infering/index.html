@@ -122,8 +122,9 @@ or you can manually specify the schema of each column you want using another yam
 <p>This is the simplest configuration. Let's see the example we saw before in the <a href="https://fedemgp.github.io">welcome page</a>
 with automatic infer schema enabled</p>
 <pre><code class="language-bash">$ cat ./tests/data/config/infer_schema.yaml
-app_name: &quot;test&quot;
-number_of_cores: 1
+spark_configuration:
+  app_name: &quot;test&quot;
+  number_of_cores: 1
 schema:
   infer: True
 </code></pre>
@@ -178,7 +179,7 @@ but it can be overriden in the <a href="https://fedemgp.github.io/documentation/
 a dictionary with the columns as keys, and a <a href="https://vincent.doba.fr/posts/20211004_spark_data_description_language_for_defining_spark_schema/">Spark's DDL type of the column</a> as value.</p>
 <h2 id="example">Example</h2>
 <p>Let's consider this datalake definition.</p>
-<pre><code class="language-bash">$ tree tests/data/datalake_with_config_schema -n --charset=ascii  # byexample: +rm=~
+<pre><code class="language-bash">$ tree tests/data/datalake_with_config_schema -n --charset=ascii  # byexample: +rm=~ +skip
 tests/data/datalake_with_config_schema
 |-- grades
 |   `-- exams.csv
@@ -324,7 +325,7 @@ spark considers all date-kind values as datetime</p>
 you don't have any restriction whatsoever (kind of, but more of that later). </p>
 <h3 id="example_1">Example</h3>
 <p>Consider these files and schema definitions</p>
-<pre><code class="language-bash">$ tree tests/data/datalake_different_files_and_schemas -n --charset=ascii  # byexample: +rm=~
+<pre><code class="language-bash">$ tree tests/data/datalake_different_files_and_schemas -n --charset=ascii  # byexample: +rm=~ +skip
 tests/data/datalake_different_files_and_schemas
 |-- schema_config.yaml
 `-- school
@@ -404,7 +405,7 @@ foo.bar:
   id: int
   invalid_col: map&lt;string, string&gt;
 
-$ tree tests/data/column_type_not_supported -n --charset=ascii  # byexample: +rm=~
+$ tree tests/data/column_type_not_supported -n --charset=ascii  # byexample: +rm=~ +skip
 tests/data/column_type_not_supported
 |-- foo
 |   `-- bar.csv

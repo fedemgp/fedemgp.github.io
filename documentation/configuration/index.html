@@ -60,7 +60,13 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#schema-configuration">Schema configuration</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#delta-configuration">Delta configuration</a>
+    <li class="toctree-l3"><a class="reference internal" href="#spark-configuration">Spark configuration</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#delta-configuration">Delta configuration</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#disable-spark-optimizations">Disable spark optimizations</a>
     </li>
         </ul>
     </li>
@@ -134,19 +140,21 @@
 'in-memory'
 </code></pre>
 <p>To better understand what these configuration means and why it is configured like this, you can take a look
-on Sergey Ivanychev's excellent research on <a href="https://medium.com/constructor-engineering/faster-pyspark-unit-tests-1cb7dfa6bdf6">"Faster PySpark Unit Test"</a></p>
+on Sergey Ivanychev's excellent research on <a href="https://medium.com/constructor-engineering/faster-pyspark-unit-tests-1cb7dfa6bdf6">"Faster PySpark Unit Test"</a>.</p>
 <h2 id="custom-configuration">Custom configuration</h2>
 <p>Some of these configurations can be overridden by providing a config yaml file. For example lets build a custom
 configuration.</p>
-<pre><code class="language-bash">$ echo &quot;app_name: test_complete
-&gt; number_of_cores: 4
-&gt; enable_hive: True
-&gt; warehouse_dir: &quot;/tmp/full_delta_lake&quot;
-&gt; delta_configuration:
-&gt;     scala_version: '2.12'
-&gt;     delta_version: '2.0.2'
-&gt;     snapshot_partitions: 2
-&gt;     log_cache_size: 3
+<pre><code class="language-bash">$ echo &quot;
+&gt; spark_configuration:
+&gt;    app_name: test_complete
+&gt;    number_of_cores: 4
+&gt;    enable_hive: True
+&gt;    warehouse_dir: &quot;/tmp/full_delta_lake&quot;
+&gt;    delta_configuration:
+&gt;        scala_version: '2.12'
+&gt;        delta_version: '2.0.2'
+&gt;        snapshot_partitions: 2
+&gt;        log_cache_size: 3
 &gt; &quot; &gt; /tmp/custom_config.yaml
 </code></pre>
 <!--
@@ -188,11 +196,16 @@ $ cat ./pyspark_data_mocker/config/app_config.py  # byexample: +rm=~
 <...>
 @dataclasses.dataclass
 class AppConfig:
+    disable_spark_configuration: bool
+    schema: "SchemaConfig"
+    spark_configuration: Optional["SparkConfig"] = None
+<...>
+@dataclasses.dataclass
+class SparkConfig:
     app_name: str
     number_of_cores: int
     enable_hive: bool
     warehouse_dir: Dir
-    schema: "SchemaConfig"
     delta_configuration: Optional["DeltaConfig"] = None
 <...>
 @dataclasses.dataclass
@@ -222,34 +235,22 @@ file </p>
 </thead>
 <tbody>
 <tr>
-<td><code>number_of_cores</code></td>
-<td>INTEGER</td>
-<td>1</td>
-<td>change the amount of CPU cores  The spark session will use</td>
-</tr>
-<tr>
-<td><code>enable_hive</code></td>
-<td>BOOL</td>
-<td>false</td>
-<td>Enables the usage of <a href="https://spark.apache.org/docs/3.1.1/api/python/reference/api/pyspark.sql.SparkSession.builder.enableHiveSupport.html">Apache Hive's catalog</a></td>
-</tr>
-<tr>
-<td><code>warehouse_dir</code></td>
-<td>STRING</td>
-<td>tempfile.TemporaryDirectory()</td>
-<td>If set, it will create a persistent directory where the wharehouse will live. By default <code>pyspark_data_mocker</code> uses a <a href="https://docs.python.org/3/library/tempfile.html#tempfile.TemporaryDirectory">TemporaryDirectory</a> that will exists as long the builder instance exists</td>
-</tr>
-<tr>
 <td><code>schema</code></td>
 <td>SCHEMA_CONFIG</td>
 <td>DEFAULT_CONFIG</td>
-<td>Schema configuration</td>
+<td>Schema configuration. You can set a custom yaml where you will define the schema of each table, or let spark to infer it. More info below</td>
 </tr>
 <tr>
-<td><code>delta_configuration</code></td>
-<td>DELTA_CONFIG</td>
-<td>None</td>
-<td>If set, it will enable <a href="https://delta.io/">Delta Lake framework</a></td>
+<td><code>disable_spark_configuration</code></td>
+<td>BOOL</td>
+<td>False</td>
+<td>If set to true, then all spark optimization mentioned before will be disabled. It is responsability of the developer to configure spark as he wish</td>
+</tr>
+<tr>
+<td><code>spark_configuration</code></td>
+<td>SPARK_CONFIG</td>
+<td></td>
+<td>A reduced amount of levers to modify the spark configuration recommended for tests.</td>
 </tr>
 </tbody>
 </table>
@@ -281,7 +282,47 @@ please</p>
 </tbody>
 </table>
 <p>More about schema inferring can be seen <a href="https://fedemgp.github.io/Documentation/schema_infering/">here</a></p>
-<h3 id="delta-configuration">Delta configuration</h3>
+<h3 id="spark-configuration">Spark configuration</h3>
+<p>This parameter is desired if you want to let <code>pyspark-data-mocker</code> to handle the spark configuration for you.
+It tries to abstract the user how the session should be and let him concentrate on define good tests without worrying
+much about performance and fine-tuning.</p>
+<table>
+<thead>
+<tr>
+<th>config name</th>
+<th>type</th>
+<th>default value</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>number_of_cores</code></td>
+<td>INTEGER</td>
+<td>1</td>
+<td>change the amount of CPU cores  The spark session will use</td>
+</tr>
+<tr>
+<td><code>enable_hive</code></td>
+<td>BOOL</td>
+<td>false</td>
+<td>Enables the usage of <a href="https://spark.apache.org/docs/3.1.1/api/python/reference/api/pyspark.sql.SparkSession.builder.enableHiveSupport.html">Apache Hive's catalog</a></td>
+</tr>
+<tr>
+<td><code>warehouse_dir</code></td>
+<td>STRING</td>
+<td>tempfile.TemporaryDirectory()</td>
+<td>If set, it will create a persistent directory where the wharehouse will live. By default <code>pyspark_data_mocker</code> uses a <a href="https://docs.python.org/3/library/tempfile.html#tempfile.TemporaryDirectory">TemporaryDirectory</a> that will exists as long the builder instance exists</td>
+</tr>
+<tr>
+<td><code>delta_configuration</code></td>
+<td>DELTA_CONFIG</td>
+<td>None</td>
+<td>If set, it will enable <a href="https://delta.io/">Delta Lake framework</a></td>
+</tr>
+</tbody>
+</table>
+<h4 id="delta-configuration">Delta configuration</h4>
 <p>Among the things you can change when enabling Delta capabilities are:</p>
 <table>
 <thead>
@@ -320,6 +361,15 @@ scala and delta version.</p>
 <p><strong>Important note 2:</strong> For the delta configuration, take into consideration that ALL VALUES should be explicitly set-up, there is no default
 value for each one of them.</p>
 </blockquote>
+<h3 id="disable-spark-optimizations">Disable spark optimizations</h3>
+<p>One advance developer may ask by himself: "why are you obfuscating me how the spark session is configured? Let me
+handle it". To that advance user , <strong>you can disable the automatic spark configuration</strong> by setting as <code>True</code> the
+value <code>disable_spark_configuration</code>.</p>
+<p>That Engineer is responsible to configure spark before using this package, using the jars he wants. Here we
+recommend to still stick to the recommendations commented <a href="https://medium.com/constructor-engineering/faster-pyspark-unit-tests-1cb7dfa6bdf6">here</a>
+in order to make the tests as fast as possible. Take in mind that the default spark configuration behaves poorly when
+handling a low amount of data, and if you write a considerable amount of test, the pipeline
+that run all the test suit may take forever!.</p>
               
             </div>
           </div><footer>
